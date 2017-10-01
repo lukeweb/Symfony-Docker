@@ -1,0 +1,29 @@
+version: "2"
+
+services:
+    php:
+        build: php7-fpm
+        ports:
+            - 9000
+        container_name: php7
+        volumes:
+            - ./application/:/var/www/symfony.dev
+    nginx:
+        build: nginx
+        container_name: symfony.dev
+        ports:
+            - 8080:80
+        links:
+            - php
+        volumes:
+            - ./nginx/log/:/var/log/nginx
+    mysql:
+        image: mysql:latest
+        container_name: symfony-db
+        volumes:
+            - ./mysql/.data/db:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
