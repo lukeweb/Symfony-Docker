@@ -2,15 +2,13 @@ version: "2"
 
 services:
     php:
+        container_name: symfony.app
         build: php7-fpm
-        ports:
-            - 9000
-        container_name: php7
         volumes:
-            - ./application/:/var/www/symfony.dev
+            - .${APP_PATH}:/var/www/symfony.dev
     nginx:
+        container_name: symfony.web
         build: nginx
-        container_name: symfony.dev
         ports:
             - 8080:80
         links:
@@ -18,8 +16,8 @@ services:
         volumes:
             - ./nginx/log/:/var/log/nginx
     mysql:
+        container_name: symfony.db
         image: mysql:latest
-        container_name: symfony-db
         volumes:
             - ./mysql/.data/db:/var/lib/mysql
         environment:
