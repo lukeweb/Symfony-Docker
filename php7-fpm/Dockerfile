@@ -14,10 +14,6 @@ RUN docker-php-ext-install mysqli
 # Type docker-php-ext-install to see available extensions
 RUN docker-php-ext-install pdo pdo_mysql
 
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-RUN composer --version
-
 # Set timezone
 RUN rm /etc/localtime
 RUN ln -s /usr/share/zoneinfo/Europe/Warsaw /etc/localtime
@@ -26,21 +22,21 @@ RUN "date"
 # install xdebug
 RUN pecl install xdebug
 RUN docker-php-ext-enable xdebug
-RUN echo "error_reporting = E_ALL" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "display_startup_errors = On" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "display_errors = On" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.remote_enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.remote_connect_back=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.idekey=\"PHPSTORM\"" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.remote_port=9001" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-
-RUN echo 'alias sf="php app/console"' >> ~/.bashrc
-RUN echo 'alias sf3="php bin/console"' >> ~/.bashrc
 
 RUN usermod -u 1000 www-data
 
 RUN mkdir /opt/application
+
+# Setup Xdebug configuration
+ADD ./scripts/xdebug_config.sh /opt/application
+RUN chmod a+x /opt/application/xdebug_config.sh; sh /opt/application/xdebug_config.sh
+
+# Install and verify composer
+ADD ./scripts/composer_install.sh /opt/application
+RUN chmod a+x /opt/application/composer_install.sh; sh /opt/application/composer_install.sh
+
 ADD ./scripts/entrypoint.sh /opt/application
+
 RUN chmod a+x /opt/application/entrypoint.sh
 
 WORKDIR /var/www/symfony.dev
